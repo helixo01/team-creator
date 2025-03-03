@@ -1,7 +1,10 @@
 import { useState } from 'react';
+import { useTheme } from '../../context/ThemeContext';
+import './ThemeSwitch.css';
 
 export default function Settings() {
   const [isOpen, setIsOpen] = useState(false);
+  const { isDarkMode, toggleTheme } = useTheme();
 
   return (
     <>
@@ -25,54 +28,31 @@ export default function Settings() {
         </div>
         <div className="settings-content">
           <div className="settings-section">
-            <h3>Apparence</h3>
-            <div className="setting-item">
-              <label>
-                <input type="checkbox" /> Mode sombre
+            <h3>Thème</h3>
+            <div className="switch">
+              <input 
+                type="checkbox" 
+                checked={isDarkMode}
+                onChange={toggleTheme}
+                name="theme-toggle"
+                id="theme-toggle"
+              />
+              <label htmlFor="theme-toggle">
+                <i className="bulb">
+                  <span className="bulb-center"></span>
+                  <span className="filament-1"></span>
+                  <span className="filament-2"></span>
+                  <span className="reflections">
+                    <span></span>
+                  </span>
+                  <span className="sparks">
+                    <i className="spark1"></i>
+                    <i className="spark2"></i>
+                    <i className="spark3"></i>
+                    <i className="spark4"></i>
+                  </span>
+                </i>
               </label>
-            </div>
-          </div>
-
-          <div className="settings-section">
-            <h3>Équipes</h3>
-            <div className="setting-item">
-              <label>
-                <input type="checkbox" /> Trier par moyenne
-              </label>
-            </div>
-            <div className="setting-item">
-              <label>
-                <input type="checkbox" /> Afficher les statistiques
-              </label>
-            </div>
-          </div>
-
-          <div className="settings-section">
-            <h3>Joueurs</h3>
-            <div className="setting-item">
-              <label>
-                <input type="checkbox" /> Trier par niveau
-              </label>
-            </div>
-            <div className="setting-item">
-              <label>Nombre maximum de joueurs par équipe</label>
-              <input type="number" min="1" max="20" defaultValue="6" />
-            </div>
-          </div>
-
-          <div className="settings-section">
-            <h3>Exportation</h3>
-            <div className="setting-item">
-              <button className="export-button">
-                <i className="fas fa-download"></i>
-                Exporter les données
-              </button>
-            </div>
-            <div className="setting-item">
-              <button className="import-button">
-                <i className="fas fa-upload"></i>
-                Importer des données
-              </button>
             </div>
           </div>
         </div>

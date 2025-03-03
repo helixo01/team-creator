@@ -3,9 +3,30 @@
   line-height: 1.5;
   font-weight: 400;
 
+  /* Nouvelle palette de couleurs */
+  --primary-color: #3498db;
+  --primary-dark: #2980b9;
+  --secondary-color: #2ecc71;
+  --secondary-dark: #27ae60;
+  --background-light: #f8f9fa;
+  --background-dark: #343a40;
+  --text-light: #f8f9fa;
+  --text-dark: #343a40;
+  --danger: #e74c3c;
+  --warning: #f1c40f;
+  --gray-100: #f8f9fa;
+  --gray-200: #e9ecef;
+  --gray-300: #dee2e6;
+  --gray-400: #ced4da;
+  --gray-500: #adb5bd;
+  --gray-600: #6c757d;
+  --gray-700: #495057;
+  --gray-800: #343a40;
+  --gray-900: #212529;
+
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: var(--text-dark);
+  background-color: var(--background-light);
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -13,54 +34,257 @@
   -moz-osx-font-smoothing: grayscale;
 }
 
+/* Mode sombre */
+:root.dark-mode {
+  color: var(--text-light);
+  background-color: var(--background-dark);
+}
+
+.dark-mode .team-card,
+.dark-mode .player-card,
+.dark-mode .player-form,
+.dark-mode .team-form,
+.dark-mode .teams-list,
+.dark-mode .players-list,
+.dark-mode .modal-content,
+.dark-mode .settings-sidebar {
+  background-color: var(--gray-800);
+  border-color: var(--gray-700);
+}
+
+.dark-mode .team-header,
+.dark-mode .settings-header {
+  border-color: var(--gray-700);
+}
+
+.dark-mode .team-header h3,
+.dark-mode .player-card h3,
+.dark-mode h1,
+.dark-mode h2,
+.dark-mode h3,
+.dark-mode .form-group label {
+  color: var(--text-light);
+}
+
+.dark-mode .form-group input,
+.dark-mode .form-group select {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+  color: var(--text-light);
+}
+
+.dark-mode .team-stats,
+.dark-mode .settings-content {
+  color: var(--gray-400);
+}
+
+.dark-mode .team-player {
+  background-color: var(--gray-700);
+  border-color: var(--gray-600);
+}
+
+.dark-mode .team-player:hover {
+  background-color: var(--gray-600);
+}
+
+.dark-mode .drag-over {
+  background-color: rgba(52, 152, 219, 0.2);
+}
+
 a {
   font-weight: 500;
-  color: #646cff;
+  color: var(--primary-color);
   text-decoration: inherit;
 }
+
 a:hover {
-  color: #535bf2;
+  color: var(--primary-dark);
 }
 
 body {
   margin: 0;
-  background-color: #f0f2f5;
+  background-color: var(--background-light);
   font-family: system-ui, -apple-system, sans-serif;
 }
 
 h1 {
   font-size: 3.2em;
   line-height: 1.1;
+  color: var(--gray-800);
+}
+
+h3 {
+  color: var(--gray-900);
+  margin-bottom: 1rem;
+}
+
+.settings-content {
+  color: var(--gray-900);
 }
 
 button {
   border-radius: 8px;
-  border: 1px solid transparent;
+  border: 1px solid var(--gray-300);
   padding: 0.6em 1.2em;
   font-size: 1em;
   font-weight: 500;
   font-family: inherit;
-  background-color: #1a1a1a;
+  background-color: var(--primary-color);
+  color: var(--text-light);
   cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  transition: all 0.25s ease;
 }
 
-@media (prefers-color-scheme: light) {
+button:hover {
+  background-color: var(--primary-dark);
+  border-color: var(--primary-dark);
+}
+
+button:focus,
+button:focus-visible {
+  outline: 3px solid var(--primary-color);
+  outline-offset: 2px;
+}
+
+/* Classes utilitaires pour les boutons */
+.save-button {
+  background-color: var(--secondary-color);
+  color: var(--text-light);
+}
+
+.save-button:hover {
+  background-color: var(--secondary-dark);
+}
+
+.cancel-button {
+  background-color: var(--gray-500);
+  color: var(--text-light);
+}
+
+.cancel-button:hover {
+  background-color: var(--gray-600);
+}
+
+.delete-button {
+  background-color: var(--danger);
+  color: var(--text-light);
+}
+
+.delete-button:hover {
+  background-color: #c0392b;
+}
+
+/* Mode sombre */
+@media (prefers-color-scheme: dark) {
   :root {
-    color: #213547;
-    background-color: #ffffff;
+    color: var(--text-light);
+    background-color: var(--background-dark);
   }
-  a:hover {
-    color: #747bff;
-  }
+
   button {
-    background-color: #f9f9f9;
+    background-color: var(--primary-dark);
   }
+
+  button:hover {
+    background-color: var(--primary-color);
+  }
+}
+
+/* Styles pour les formulaires */
+.form-group {
+  margin-bottom: 1rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  color: var(--gray-700);
+}
+
+.form-group input, .form-group select {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid var(--gray-300);
+  border-radius: 4px;
+  background-color: var(--gray-100);
+  color: var(--gray-900);
+}
+
+.form-group input:focus, .form-group select:focus {
+  outline: none;
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px rgba(52, 152, 219, 0.2);
+}
+
+/* Styles pour les cartes */
+.team-card, .player-card {
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.team-card:hover, .player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Style pour le drag and drop */
+.drag-over {
+  background-color: var(--gray-200);
+  border: 2px dashed var(--primary-color);
+}
+
+.settings-section {
+  padding: 1rem;
+  text-align: center;
+}
+
+.settings-section h3 {
+  margin-bottom: 1.5rem;
+  font-size: 1.1rem;
+  color: var(--gray-800);
+}
+
+.team-player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex: 1;
+}
+
+.team-player-position {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  background-color: var(--primary-color);
+  color: white;
+  border-radius: 50%;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.team-player.drag-over {
+  border: 2px dashed var(--primary-color);
+  background-color: rgba(52, 152, 219, 0.1);
+  transform: translateY(0);
+  position: relative;
+}
+
+.team-player.drag-over::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  border-radius: 4px;
+  background: rgba(52, 152, 219, 0.1);
+  pointer-events: none;
+}
+
+.dark-mode .team-player-position {
+  background-color: var(--primary-dark);
 }

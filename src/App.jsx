@@ -1,5 +1,6 @@
 import { PlayersProvider } from './context/PlayersContext'
 import { TeamsProvider } from './context/TeamsContext'
+import { ThemeProvider } from './context/ThemeContext'
 import PlayerForm from './components/players/PlayerForm'
 import TeamForm from './components/teams/TeamForm'
 import PlayerList from './components/players/PlayerList'
@@ -11,30 +12,32 @@ import './App.css'
 
 function App() {
   return (
-    <TeamsProvider>
-      <PlayersProvider>
-        <div className="container">
-          <div className="header-container">
-            <h1>Team Creator</h1>
-            <div className="header-buttons">
-              <SaveButton />
-              <ResetButton />
-              <Settings />
+    <ThemeProvider>
+      <TeamsProvider>
+        <PlayersProvider>
+          <div className="container">
+            <div className="header-container">
+              <h1>Team Creator</h1>
+              <div className="header-buttons">
+                <SaveButton />
+                <ResetButton />
+                <Settings />
+              </div>
+            </div>
+            
+            <div className="forms-container">
+              <PlayerForm />
+              <TeamForm />
+            </div>
+
+            <div className="content-container">
+              <TeamList />
+              <PlayerList />
             </div>
           </div>
-          
-          <div className="forms-container">
-            <PlayerForm />
-            <TeamForm />
-          </div>
-
-          <div className="content-container">
-            <TeamList />
-            <PlayerList />
-          </div>
-        </div>
-      </PlayersProvider>
-    </TeamsProvider>
+        </PlayersProvider>
+      </TeamsProvider>
+    </ThemeProvider>
   )
 }
 

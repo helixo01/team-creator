@@ -4,13 +4,25 @@ import { useTeams } from '../../context/TeamsContext';
 import StarRating from '../common/StarRating';
 import EditTeamModal from './EditTeamModal';
 
+const getPositionLabel = (position) => {
+  const mainPositions = ['T', 'J', 'M', 'A', 'S'];
+  if (position < mainPositions.length) {
+    return mainPositions[position];
+  }
+  return `R${position - mainPositions.length + 1}`;
+};
+
 export default function TeamCard({ team }) {
   const { removeTeam, updateTeam } = useTeams();
   const { players, updatePlayer } = usePlayers();
   const [isDragOver, setIsDragOver] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [draggedOverPosition, setDraggedOverPosition] = useState(null);
   
-  const teamPlayers = players.filter(p => p.teamId === team.id);
+  const teamPlayers = players
+    .filter(p => p.teamId === team.id)
+    .sort((a, b) => (a.position || 0) - (b.position || 0));
+
   const teamAverage = teamPlayers.length 
     ? (teamPlayers.reduce((sum, p) => sum + p.rating, 0) / teamPlayers.length).toFixed(1)
     : 0;
@@ -28,14 +40,16 @@ export default function TeamCard({ team }) {
 
   const handleDragEnd = (e) => {
     e.target.classList.remove('dragging');
+    setDraggedOverPosition(null);
   };
 
-  const handleDragOver = (e) => {
+  const handleDragOver = (e, position) => {
     e.preventDefault();
     e.stopPropagation();
     
     if (e.dataTransfer.types.includes('application/json')) {
       setIsDragOver(true);
+      setDraggedOverPosition(position);
       e.dataTransfer.dropEffect = 'move';
     }
   };
@@ -44,19 +58,42 @@ export default function TeamCard({ team }) {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
+    setDraggedOverPosition(null);
   };
 
-  const handleDrop = (e) => {
+  const handleDrop = (e, dropPosition) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragOver(false);
+    setDraggedOverPosition(null);
 
     try {
       const data = e.dataTransfer.getData('application/json');
-      const player = JSON.parse(data);
+      const draggedPlayer = JSON.parse(data);
       
-      if (player.teamId !== team.id) {
-        updatePlayer(player.id, { teamId: team.id });
+      if (draggedPlayer.teamId === team.id) {
+        // Réorganisation au sein de la même équipe
+        const updatedPlayers = teamPlayers.map(p => {
+          if (p.id === draggedPlayer.id) {
+            return { ...p, position: dropPosition };
+          }
+          // Ajuster les positions des autres joueurs
+          if ((p.position || 0) >= dropPosition && p.id !== draggedPlayer.id) {
+            return { ...p, position: (p.position || 0) + 1 };
+          }
+          return p;
+        });
+        
+        updatedPlayers.forEach(p => {
+          updatePlayer(p.id, { position: p.position });
+        });
+      } else {
+        // Nouveau joueur dans l'équipe
+        const maxPosition = Math.max(...teamPlayers.map(p => p.position || 0), -1);
+        updatePlayer(draggedPlayer.id, { 
+          teamId: team.id,
+          position: maxPosition + 1
+        });
       }
     } catch (error) {
       console.error('Erreur lors du drop:', error);
@@ -92,10 +129,10 @@ export default function TeamCard({ team }) {
       
       <div 
         className={`team-content ${isDragOver ? 'drag-over' : ''}`}
-        onDragOver={handleDragOver}
+        onDragOver={(e) => handleDragOver(e, teamPlayers.length)}
         onDragLeave={handleDragLeave}
         onDragEnter={(e) => e.preventDefault()}
-        onDrop={handleDrop}
+        onDrop={(e) => handleDrop(e, teamPlayers.length)}
       >
         <div className="team-stats">
           <span>Moyenne: {teamAverage} ★</span>
@@ -103,15 +140,21 @@ export default function TeamCard({ team }) {
         </div>
         
         <div className="team-players">
-          {teamPlayers.map(player => (
+          {teamPlayers.map((player, index) => (
             <div 
               key={player.id} 
-              className="team-player"
+              className={`team-player ${draggedOverPosition === index ? 'drag-over' : ''}`}
               draggable="true"
               onDragStart={(e) => handleDragStart(e, player)}
               onDragEnd={handleDragEnd}
+              onDragOver={(e) => handleDragOver(e, index)}
+              onDragLeave={handleDragLeave}
+              onDrop={(e) => handleDrop(e, index)}
             >
               <div className="team-player-info">
+                <span className="team-player-position" title={`Position ${index + 1}`}>
+                  {getPositionLabel(index)}
+                </span>
                 <span className="team-player-name">{player.name}</span>
                 <StarRating rating={player.rating} readonly={true} />
               </div>
@@ -119,7 +162,7 @@ export default function TeamCard({ team }) {
                 className="remove-button"
                 onClick={(e) => {
                   e.stopPropagation();
-                  updatePlayer(player.id, { teamId: null });
+                  updatePlayer(player.id, { teamId: null, position: null });
                 }}
                 title="Retirer le joueur"
               >
