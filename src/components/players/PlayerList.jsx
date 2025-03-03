@@ -58,7 +58,7 @@ function PlayerList() {
 
       {showScrollButtons && (
         <button 
-          className="scroll-button scroll-right" 
+          className="scroll-button scroll-right"
           onClick={() => scroll('right')}
         >
           <i className="fas fa-chevron-right"></i>

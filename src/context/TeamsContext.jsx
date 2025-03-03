@@ -20,20 +20,16 @@ export function TeamsProvider({ children }) {
   }, []);
 
   const addTeam = (team) => {
-    setTeams(prev => [...prev, { 
-      ...team, 
-      id: crypto.randomUUID(),
-      players: []
-    }]);
+    setTeams(prev => [...prev, { ...team, id: Date.now() }]);
   };
 
   const removeTeam = (teamId) => {
-    setTeams(prev => prev.filter(t => t.id !== teamId));
+    setTeams(prev => prev.filter(team => team.id !== teamId));
   };
 
-  const updateTeam = (teamId, updates) => {
-    setTeams(prev => prev.map(t => 
-      t.id === teamId ? { ...t, ...updates } : t
+  const updateTeam = (updatedTeam) => {
+    setTeams(prev => prev.map(team => 
+      team.id === updatedTeam.id ? updatedTeam : team
     ));
   };
 

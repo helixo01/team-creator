@@ -1,93 +1,148 @@
+import { useState } from 'react';
 import { usePlayers } from '../../context/PlayersContext';
+import { useTeams } from '../../context/TeamsContext';
+import StarRating from '../common/StarRating';
+import EditTeamModal from './EditTeamModal';
 
-export default function TeamCard({ team, onEdit }) {
-  const { players, updatePlayer, removePlayer } = usePlayers();
+export default function TeamCard({ team }) {
+  const { removeTeam, updateTeam } = useTeams();
+  const { players, updatePlayer } = usePlayers();
+  const [isDragOver, setIsDragOver] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
   
-  const teamPlayers = players.filter(player => player.teamId === team.id);
-  
-  // Calcul de la moyenne de l'équipe
+  const teamPlayers = players.filter(p => p.teamId === team.id);
   const teamAverage = teamPlayers.length 
-    ? (teamPlayers.reduce((sum, player) => sum + player.rating, 0) / teamPlayers.length).toFixed(1)
+    ? (teamPlayers.reduce((sum, p) => sum + p.rating, 0) / teamPlayers.length).toFixed(1)
     : 0;
+
+  const handleDragStart = (e, player) => {
+    // Empêcher le drag si on clique sur le bouton de suppression
+    if (e.target.closest('.remove-button')) {
+      e.preventDefault();
+      return;
+    }
+    e.dataTransfer.setData('application/json', JSON.stringify(player));
+    e.dataTransfer.effectAllowed = 'move';
+    e.target.classList.add('dragging');
+  };
+
+  const handleDragEnd = (e) => {
+    e.target.classList.remove('dragging');
+  };
 
   const handleDragOver = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.add('drag-over');
+    e.stopPropagation();
+    
+    if (e.dataTransfer.types.includes('application/json')) {
+      setIsDragOver(true);
+      e.dataTransfer.dropEffect = 'move';
+    }
   };
 
   const handleDragLeave = (e) => {
-    e.currentTarget.classList.remove('drag-over');
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragOver(false);
   };
 
   const handleDrop = (e) => {
     e.preventDefault();
-    e.currentTarget.classList.remove('drag-over');
-    
+    e.stopPropagation();
+    setIsDragOver(false);
+
     try {
-      const playerData = JSON.parse(e.dataTransfer.getData('application/json'));
-      if (playerData && playerData.id) {
-        updatePlayer(playerData.id, { teamId: team.id });
+      const data = e.dataTransfer.getData('application/json');
+      const player = JSON.parse(data);
+      
+      if (player.teamId !== team.id) {
+        updatePlayer(player.id, { teamId: team.id });
       }
     } catch (error) {
       console.error('Erreur lors du drop:', error);
     }
   };
 
-  const handleRemovePlayer = (playerId) => {
-    updatePlayer(playerId, { teamId: null });
-  };
-
-  const handleDeletePlayer = (playerId) => {
-    removePlayer(playerId);
+  const handleEditSave = (updatedTeam) => {
+    updateTeam(updatedTeam);
+    setIsEditing(false);
   };
 
   return (
-    <div 
-      className="team-content"
-      onDragOver={handleDragOver}
-      onDragLeave={handleDragLeave}
-      onDrop={handleDrop}
-    >
-      <div className="team-stats">
-        <span>Moyenne: {teamAverage} ★</span>
-        <span>{teamPlayers.length} joueurs</span>
+    <div className="team-card">
+      <div className="team-header">
+        <h3>{team.name}</h3>
+        <div className="team-actions">
+          <button 
+            className="edit-icon" 
+            title="Modifier l'équipe"
+            onClick={() => setIsEditing(true)}
+          >
+            <i className="fas fa-pen"></i>
+          </button>
+          <button 
+            className="delete-button" 
+            title="Supprimer l'équipe"
+            onClick={() => removeTeam(team.id)}
+          >
+            <i className="fas fa-trash"></i>
+          </button>
+        </div>
       </div>
-      <div className="team-players">
-        {teamPlayers.map(player => (
-          <div key={player.id} className="team-player-card">
-            <div className="player-info">
-              <span>{player.name}</span>
-              <div className="player-rating">
-                {'★'.repeat(player.rating)}
-                {'☆'.repeat(5 - player.rating)}
+      
+      <div 
+        className={`team-content ${isDragOver ? 'drag-over' : ''}`}
+        onDragOver={handleDragOver}
+        onDragLeave={handleDragLeave}
+        onDragEnter={(e) => e.preventDefault()}
+        onDrop={handleDrop}
+      >
+        <div className="team-stats">
+          <span>Moyenne: {teamAverage} ★</span>
+          <span>{teamPlayers.length} joueurs</span>
+        </div>
+        
+        <div className="team-players">
+          {teamPlayers.map(player => (
+            <div 
+              key={player.id} 
+              className="team-player"
+              draggable="true"
+              onDragStart={(e) => handleDragStart(e, player)}
+              onDragEnd={handleDragEnd}
+            >
+              <div className="team-player-info">
+                <span className="team-player-name">{player.name}</span>
+                <StarRating rating={player.rating} readonly={true} />
               </div>
-            </div>
-            <div className="player-actions">
-              <button 
-                className="edit-button"
-                onClick={() => onEdit(player)}
-                title="Modifier le joueur"
-              >
-                ✎
-              </button>
               <button 
                 className="remove-button"
-                onClick={() => handleRemovePlayer(player.id)}
-                title="Retirer de l'équipe"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  updatePlayer(player.id, { teamId: null });
+                }}
+                title="Retirer le joueur"
               >
-                ↩
-              </button>
-              <button 
-                className="delete-button"
-                onClick={() => handleDeletePlayer(player.id)}
-                title="Supprimer le joueur"
-              >
-                ×
+                <i className="fas fa-xmark"></i>
               </button>
             </div>
-          </div>
-        ))}
+          ))}
+          
+          {teamPlayers.length === 0 && (
+            <div className={`team-drop-zone empty ${isDragOver ? 'drag-over' : ''}`}>
+              Glissez des joueurs ici
+            </div>
+          )}
+        </div>
       </div>
+
+      {isEditing && (
+        <EditTeamModal 
+          team={team}
+          onSave={handleEditSave}
+          onCancel={() => setIsEditing(false)}
+        />
+      )}
     </div>
   );
 } 

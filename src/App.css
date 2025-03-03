@@ -66,15 +66,35 @@ body {
   overflow: auto;
   background: white;
   border-radius: 8px;
-  padding: 1rem;
+  padding: 0.75rem;
   box-shadow: 0 2px 8px rgba(0,0,0,0.05);
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.teams-list-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  font-weight: 600;
 }
 
 .teams-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.75rem;
+  padding: 0.25rem;
+  overflow-y: auto;
 }
 
 /* Liste des joueurs (en bas) */
@@ -112,6 +132,8 @@ body {
   margin-bottom: 4px;
   scrollbar-width: thin;
   scrollbar-color: #ccc #f1f1f1;
+  position: relative;
+  z-index: 1;
 }
 
 /* Style de la barre de défilement horizontale */
@@ -150,6 +172,20 @@ body {
   flex-direction: column;
   justify-content: space-between;
   flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+  position: relative;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.player-card:active {
+  cursor: grabbing;
+}
+
+.player-card.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
 }
 
 /* Modale d'édition */
@@ -178,22 +214,30 @@ body {
   height: 36px;
 }
 
-/* Ajustements des boutons de défilement */
+/* Boutons de défilement */
 .scroll-button {
-  width: 28px;
-  height: 28px;
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
   background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
   opacity: 0;
   transition: all 0.2s;
+  padding: 0;
 }
 
-.scroll-button:hover {
-  background: #f8f9fa;
-  transform: translateY(-50%) scale(1.1);
-}
-
-.players-list:hover .scroll-button {
-  opacity: 1;
+.scroll-button i {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1;
 }
 
 .scroll-left {
@@ -202,6 +246,16 @@ body {
 
 .scroll-right {
   right: 0.5rem;
+}
+
+.players-list:hover .scroll-button {
+  opacity: 1;
+}
+
+.scroll-button:hover {
+  background: #f8f9fa;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
 }
 
 /* Ajustement des cartes de joueurs */
@@ -240,10 +294,6 @@ body {
   transform: scale(1.1);
 }
 
-.scroll-button i {
-  font-size: 0.9rem;
-}
-
 .player-card h3 {
   margin: 0;
   font-size: 0.85rem;
@@ -259,18 +309,215 @@ body {
 .team-card {
   background: white;
   border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
   border: 1px solid #e1e4e8;
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s;
 }
 
 .team-card:hover {
   transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e1e4e8;
+  background: #f8f9fa;
+  border-radius: 6px 6px 0 0;
+}
+
+.team-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
 }
 
 .team-content {
-  padding: 0.8rem;
+  padding: 0.5rem;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.team-content.drag-over {
+  background-color: rgba(0, 102, 255, 0.05);
+}
+
+.team-stats {
+  padding: 0.25rem 0;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.team-players {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+  min-height: 60px;
+  transition: min-height 0.2s;
+}
+
+.team-players:empty {
+  min-height: 0;
+}
+
+.team-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e1e4e8;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+  position: relative;
+}
+
+.team-player:active {
+  cursor: grabbing;
+}
+
+.team-player.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+  background: #f8f9fa;
+}
+
+.team-player:hover {
+  background: #f8f9fa;
+}
+
+.team-player .player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.team-player .remove-button {
+  padding: 0;
+  height: 18px;
+  width: 18px;
+  min-width: 18px;
+  margin-left: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.2s;
+  background: #ff4444;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.team-player .remove-button:hover {
+  background: #cc0000;
+  transform: scale(1.1);
+}
+
+.team-player:hover .remove-button {
+  opacity: 1;
+}
+
+.team-player .remove-button i {
+  font-size: 0.7rem;
+  margin: 0;
+  line-height: 1;
+}
+
+.team-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.team-player-name {
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-player-rating {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.team-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.team-actions button {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.team-actions button i {
+  font-size: 0.75rem;
+}
+
+/* Zone de drop pour les joueurs */
+.team-drop-zone {
+  min-height: 80px;
+  border: 2px dashed #e1e4e8;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.team-drop-zone.drag-over {
+  background-color: rgba(0, 102, 255, 0.1);
+  border-color: #0066ff;
+  transform: scale(1.02);
+}
+
+.team-drop-zone.empty {
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  grid-column: 1 / -1;
+}
+
+/* État vide */
+.teams-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #666;
+  text-align: center;
+}
+
+.teams-empty i {
+  font-size: 2rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.teams-empty p {
+  margin: 0;
+  font-size: 0.95rem;
 }
 
 /* Styles des boutons */
@@ -408,11 +655,6 @@ button[type="submit"]:hover {
   font-size: 0.8rem;
 }
 
-.team-actions {
-  display: flex;
-  gap: 0.25rem;
-}
-
 .form-actions {
   display: flex;
   gap: 0.8rem;
@@ -421,15 +663,24 @@ button[type="submit"]:hover {
 
 .save-button {
   background: #4CAF50;
+  color: white !important;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.save-button i {
+  color: white !important;
 }
 
 .cancel-button {
   background: #666;
-}
-
-.player-card.dragging {
-  opacity: 0.5;
-  transform: scale(0.95);
 }
 
 .modal-overlay {
@@ -480,47 +731,97 @@ button[type="submit"]:hover {
   background: #c82333;
 }
 
-/* Ajout des styles pour les boutons d'en-tête */
+/* Ajustement des boutons d'en-tête */
 .header-buttons {
   display: flex;
-  gap: 1rem;
+  gap: 0.5rem;
   align-items: center;
 }
 
-.save-button {
-  background: #4CAF50;
-  color: white;
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
+/* Style du bouton paramètres */
+.settings-button {
+  background: none;
   border: none;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
-  font-size: 0.9rem;
-  transition: background-color 0.2s;
+  transition: all 0.2s;
 }
 
-.save-button:hover {
-  background: #45a049;
+.settings-button i {
+  font-size: 1.2rem;
 }
 
-/* Modification du style du header-container pour aligner les éléments */
-.header-container {
+.settings-button:hover {
+  color: #1a1a1a;
+  transform: rotate(30deg);
+}
+
+/* Styles de la sidebar */
+.settings-sidebar {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-sidebar.open {
+  right: 0;
+}
+
+.settings-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1rem;
-  grid-column: 1 / -1;
-  padding-bottom: 0.5rem;
-  border-bottom: 2px solid #e1e4e8;
+  padding: 1rem;
+  border-bottom: 1px solid #e1e4e8;
 }
 
-/* Ajout d'un titre pour chaque formulaire */
-.form-title {
-  font-size: 0.95rem;
-  font-weight: 600;
+.settings-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
   color: #1a1a1a;
-  margin: 0 0 0.5rem 0;
-  padding-bottom: 0.5rem;
-  border-bottom: 1px solid #e1e4e8;
+}
+
+.settings-header .close-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.settings-header .close-button:hover {
+  color: #1a1a1a;
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
 }
 
 /* Système d'étoiles */
@@ -613,4 +914,1208 @@ button[type="submit"]:hover {
 
 .player-rating {
   margin: 0.15rem 0;
+}
+
+/* Ajustement des cartes d'équipe pendant le drag */
+.team-card.drag-over {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+}
+
+/* Style pour indiquer les zones droppables */
+.droppable {
+  position: relative;
+}
+
+.droppable::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 102, 255, 0.05);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.droppable.drag-over::after {
+  opacity: 1;
+}
+
+/* Styles pour le drag & drop */
+.player-card {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+  position: relative;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.player-card.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+.team-content {
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.team-content.drag-over {
+  background-color: rgba(0, 102, 255, 0.05);
+}
+
+.team-drop-zone {
+  transition: all 0.2s ease;
+}
+
+.team-drop-zone.drag-over {
+  background-color: rgba(0, 102, 255, 0.1);
+  border-color: #0066ff;
+  transform: scale(1.02);
+}
+
+/* Animation pour le drop */
+@keyframes dropPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.team-player {
+  animation: dropPulse 0.3s ease;
+}
+
+/* Ajustement des étoiles dans les cartes de joueurs d'équipe */
+.team-player .star-rating {
+  padding: 0;
+  gap: 0.2rem;
+}
+
+.team-player .star {
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+/* Styles pour les joueurs d'équipe draggables */
+.team-player {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.team-player:active {
+  cursor: grabbing;
+}
+
+.team-player.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+  background: #f8f9fa;
+}
+
+/* Ajustement du style pendant le drag */
+.team-player .remove-button {
+  pointer-events: none; /* Empêche le bouton de supprimer d'interférer avec le drag */
+}
+
+.team-content.drag-over .team-players {
+  background-color: rgba(0, 102, 255, 0.05);
+  border-radius: 4px;
+}
+
+/* Ajustement du bouton de suppression dans les cartes de joueurs d'équipe */
+.team-player .remove-button {
+  padding: 0;
+  height: 18px;
+  width: 18px;
+  min-width: 18px;
+  margin-left: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.2s;
+  background: #ff4444;
+  pointer-events: auto; /* Réactive les événements sur le bouton */
+  z-index: 2; /* S'assure que le bouton est au-dessus pour être cliquable */
+}
+
+/* S'assure que le bouton reste visible pendant le drag */
+.team-player.dragging .remove-button {
+  opacity: 1;
+}
+
+/* Reset des styles de base */
+body {
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  background-color: #f0f2f5;
+}
+
+/* Layout principal */
+.container {
+  width: 100%;
+  min-height: 100vh;
+  box-sizing: border-box;
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  grid-template-rows: auto 1fr;
+  gap: 1rem;
+  padding: 1rem;
+}
+
+/* En-tête */
+.header-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+  grid-column: 1 / -1;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.header-container h1 {
+  margin: 0;
+  padding: 0;
+  border: none;
+}
+
+/* Zone des formulaires (côté gauche) */
+.forms-container {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  height: fit-content;
+}
+
+.player-form, .team-form {
+  background: white;
+  padding: 0.75rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+}
+
+/* Zone de contenu principale (côté droit) */
+.content-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+/* Zone des équipes */
+.teams-list {
+  flex: 1;
+  overflow: auto;
+  background: white;
+  border-radius: 8px;
+  padding: 0.75rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.teams-list-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 0.5rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.teams-list-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  font-weight: 600;
+}
+
+.teams-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 0.75rem;
+  padding: 0.25rem;
+  overflow-y: auto;
+}
+
+/* Liste des joueurs (en bas) */
+.players-list {
+  position: relative;
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  padding: 0.5rem 2rem;
+  margin-top: auto;
+  height: 110px;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.players-list h2 {
+  margin: 0;
+  font-size: 0.9rem;
+  color: #666;
+  padding: 0 0.25rem 0.5rem 0.25rem;
+  border-bottom: 1px solid #eee;
+}
+
+.players-grid {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 0.5rem 0;
+  height: 70px;
+  min-height: 70px;
+  align-items: center;
+  margin-bottom: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #ccc #f1f1f1;
+  position: relative;
+  z-index: 1;
+}
+
+/* Style de la barre de défilement horizontale */
+.players-grid::-webkit-scrollbar {
+  height: 4px;
+  width: auto;
+}
+
+.players-grid::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 2px;
+}
+
+.players-grid::-webkit-scrollbar-thumb {
+  background: #ccc;
+  border-radius: 2px;
+}
+
+.players-grid::-webkit-scrollbar-thumb:hover {
+  background: #999;
+}
+
+/* Cartes de joueurs */
+.player-card {
+  background: white;
+  padding: 0.5rem;
+  border-radius: 6px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  min-width: 120px;
+  max-width: 120px;
+  height: 60px;
+  min-height: 60px;
+  border: 1px solid #e1e4e8;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  flex-shrink: 0;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+  position: relative;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.player-card:active {
+  cursor: grabbing;
+}
+
+.player-card.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+/* Modale d'édition */
+.edit-player-modal {
+  width: 400px;
+  max-width: 90vw;
+  padding: 1.5rem;
+}
+
+.edit-player-modal h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 0.75rem;
+  margin-top: 1.5rem;
+}
+
+.modal-actions button {
+  flex: 1;
+  height: 36px;
+}
+
+/* Boutons de défilement */
+.scroll-button {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 24px;
+  background: white;
+  border: 1px solid #e1e4e8;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+  opacity: 0;
+  transition: all 0.2s;
+  padding: 0;
+}
+
+.scroll-button i {
+  font-size: 0.8rem;
+  color: #666;
+  line-height: 1;
+}
+
+.scroll-left {
+  left: 0.5rem;
+}
+
+.scroll-right {
+  right: 0.5rem;
+}
+
+.players-list:hover .scroll-button {
+  opacity: 1;
+}
+
+.scroll-button:hover {
+  background: #f8f9fa;
+  transform: translateY(-50%) scale(1.1);
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+/* Ajustement des cartes de joueurs */
+.player-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.3rem;
+}
+
+.edit-icon {
+  background: none;
+  border: none;
+  color: #666;
+  padding: 0.2rem;
+  cursor: pointer;
+  opacity: 0.6;
+  transition: all 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.edit-icon i {
+  font-size: 0.8rem;
+}
+
+.edit-icon:hover {
+  opacity: 1;
+  color: #0066ff;
+  transform: scale(1.1);
+}
+
+.player-card h3 {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 500;
+  flex: 1;
+}
+
+.player-rating {
+  margin: 0.15rem 0;
+}
+
+/* Cartes d'équipe */
+.team-card {
+  background: white;
+  border-radius: 8px;
+  border: 1px solid #e1e4e8;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  transition: all 0.2s;
+}
+
+.team-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+}
+
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 0.75rem;
+  border-bottom: 1px solid #e1e4e8;
+  background: #f8f9fa;
+  border-radius: 6px 6px 0 0;
+}
+
+.team-header h3 {
+  margin: 0;
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #1a1a1a;
+}
+
+.team-content {
+  padding: 0.5rem;
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.team-content.drag-over {
+  background-color: rgba(0, 102, 255, 0.05);
+}
+
+.team-stats {
+  padding: 0.25rem 0;
+  margin-bottom: 0.25rem;
+  font-size: 0.75rem;
+}
+
+.team-players {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 0.25rem;
+  min-height: 60px;
+  transition: min-height 0.2s;
+}
+
+.team-players:empty {
+  min-height: 0;
+}
+
+.team-player {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.25rem;
+  background: white;
+  border-radius: 4px;
+  border: 1px solid #e1e4e8;
+  font-size: 0.8rem;
+  transition: all 0.2s;
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+  position: relative;
+}
+
+.team-player:active {
+  cursor: grabbing;
+}
+
+.team-player.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+  background: #f8f9fa;
+}
+
+.team-player:hover {
+  background: #f8f9fa;
+}
+
+.team-player .player-info {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.team-player .remove-button {
+  padding: 0;
+  height: 18px;
+  width: 18px;
+  min-width: 18px;
+  margin-left: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.2s;
+  background: #ff4444;
+  pointer-events: auto;
+  z-index: 2;
+}
+
+.team-player .remove-button:hover {
+  background: #cc0000;
+  transform: scale(1.1);
+}
+
+.team-player:hover .remove-button {
+  opacity: 1;
+}
+
+.team-player .remove-button i {
+  font-size: 0.7rem;
+  margin: 0;
+  line-height: 1;
+}
+
+.team-player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.1rem;
+  min-width: 0;
+  flex: 1;
+}
+
+.team-player-name {
+  font-weight: 500;
+  color: #1a1a1a;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.team-player-rating {
+  color: #666;
+  font-size: 0.8rem;
+}
+
+.team-actions {
+  display: flex;
+  gap: 0.35rem;
+  margin-top: 0.75rem;
+  padding-top: 0.5rem;
+  border-top: 1px solid #f0f0f0;
+}
+
+.team-actions button {
+  padding: 0.35rem 0.5rem;
+  font-size: 0.8rem;
+  height: 28px;
+  display: flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
+.team-actions button i {
+  font-size: 0.75rem;
+}
+
+/* Zone de drop pour les joueurs */
+.team-drop-zone {
+  min-height: 80px;
+  border: 2px dashed #e1e4e8;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #666;
+  transition: all 0.2s ease;
+}
+
+.team-drop-zone.drag-over {
+  background-color: rgba(0, 102, 255, 0.1);
+  border-color: #0066ff;
+  transform: scale(1.02);
+}
+
+.team-drop-zone.empty {
+  padding: 0.5rem;
+  font-size: 0.8rem;
+  grid-column: 1 / -1;
+}
+
+/* État vide */
+.teams-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem;
+  color: #666;
+  text-align: center;
+}
+
+.teams-empty i {
+  font-size: 2rem;
+  color: #ccc;
+  margin-bottom: 1rem;
+}
+
+.teams-empty p {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Styles des boutons */
+button {
+  border: none;
+  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.2s;
+}
+
+button[type="submit"] {
+  background: #0066ff;
+  color: white;
+  padding: 0.5rem;
+  width: 100%;
+  font-weight: 500;
+  font-size: 0.9rem;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 0.5rem;
+}
+
+button[type="submit"]:hover {
+  background: #0052cc;
+}
+
+.edit-button {
+  background: #4CAF50;
+  color: white;
+}
+
+.edit-button:hover {
+  background: #45a049;
+}
+
+.delete-button {
+  background: #ff4444;
+  color: white;
+}
+
+.delete-button:hover {
+  background: #cc0000;
+}
+
+.remove-button {
+  background: #ff9800;
+  color: white;
+}
+
+.remove-button:hover {
+  background: #f57c00;
+}
+
+.remove-button i {
+  font-size: 0.8rem;
+  margin-right: 0.2rem;
+}
+
+/* Formulaires */
+.form-group {
+  margin-bottom: 0.5rem;
+}
+
+.form-group label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+}
+
+.form-group input,
+.form-group select {
+  width: 100%;
+  padding: 0.4rem 0.6rem;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  transition: border-color 0.2s;
+  box-sizing: border-box;
+  height: 32px;
+}
+
+.form-group input:focus,
+.form-group select:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0,102,255,0.1);
+}
+
+/* Statistiques d'équipe */
+.team-stats {
+  display: flex;
+  justify-content: space-between;
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #e1e4e8;
+  margin-bottom: 0.8rem;
+  color: #666;
+}
+
+/* En-tête d'équipe */
+.team-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.8rem;
+  padding-bottom: 0.5rem;
+  border-bottom: 2px solid #e1e4e8;
+}
+
+.team-header h3 {
+  margin: 0;
+  font-size: 1.2rem;
+  color: #1a1a1a;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.player-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.25rem;
+}
+
+.player-actions button {
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.form-actions {
+  display: flex;
+  gap: 0.8rem;
+  margin-top: 0.8rem;
+}
+
+.save-button {
+  background: #4CAF50;
+}
+
+.cancel-button {
+  background: #666;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: white;
+  padding: 2rem;
+  border-radius: 8px;
+  position: relative;
+  max-width: 500px;
+  width: 90%;
+}
+
+.modal-close {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  background: none;
+  border: none;
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* Modification du style du bouton reset */
+.reset-button {
+  background: #dc3545;
+  color: white;
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: background-color 0.2s;
+}
+
+.reset-button:hover {
+  background: #c82333;
+}
+
+/* Ajustement des boutons d'en-tête */
+.header-buttons {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+/* Style du bouton paramètres */
+.settings-button {
+  background: none;
+  border: none;
+  color: #666;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.settings-button i {
+  font-size: 1.2rem;
+}
+
+.settings-button:hover {
+  color: #1a1a1a;
+  transform: rotate(30deg);
+}
+
+/* Styles de la sidebar */
+.settings-sidebar {
+  position: fixed;
+  top: 0;
+  right: -300px;
+  width: 300px;
+  height: 100vh;
+  background: white;
+  box-shadow: -2px 0 8px rgba(0, 0, 0, 0.1);
+  transition: right 0.3s ease;
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+}
+
+.settings-sidebar.open {
+  right: 0;
+}
+
+.settings-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.settings-header h2 {
+  margin: 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+}
+
+.settings-header .close-button {
+  background: none;
+  border: none;
+  color: #666;
+  cursor: pointer;
+  padding: 0.5rem;
+  font-size: 1.1rem;
+}
+
+.settings-header .close-button:hover {
+  color: #1a1a1a;
+}
+
+.settings-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 1rem;
+}
+
+.settings-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.3);
+  z-index: 999;
+}
+
+/* Système d'étoiles */
+.star-rating {
+  display: flex;
+  gap: 0.5rem;
+  justify-content: center;
+}
+
+.star {
+  cursor: pointer;
+  font-size: 2.3rem;
+  color: #ddd;
+  transition: color 0.2s;
+  user-select: none;
+  padding: 0.25rem;
+}
+
+.star:hover,
+.star.filled {
+  color: #ffc107;
+}
+
+.rating-container {
+  margin-bottom: 0.75rem;
+}
+
+.rating-container label {
+  display: block;
+  margin-bottom: 0.25rem;
+  font-weight: 500;
+  font-size: 0.9rem;
+  color: #1a1a1a;
+  text-align: center;
+}
+
+/* Ajustement pour les étoiles dans les cartes de joueurs */
+.player-card .star-rating {
+  padding: 0.25rem 0;
+}
+
+.player-card .star {
+  font-size: 1rem;
+  padding: 0.1rem;
+  cursor: default;
+}
+
+/* Styles pour le mode édition des cartes joueurs */
+.player-card.editing {
+  padding: 0.75rem;
+}
+
+.edit-name-input {
+  width: 100%;
+  padding: 0.4rem;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  margin-bottom: 0.5rem;
+}
+
+.edit-name-input:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0,102,255,0.1);
+}
+
+.edit-actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 0.5rem;
+}
+
+.edit-actions button {
+  flex: 1;
+  padding: 0.25rem 0.5rem;
+  font-size: 0.8rem;
+}
+
+.player-actions {
+  display: flex;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+}
+
+/* Ajustement de l'espacement */
+.player-header {
+  margin-bottom: 0.3rem;
+}
+
+.player-rating {
+  margin: 0.15rem 0;
+}
+
+/* Ajustement des cartes d'équipe pendant le drag */
+.team-card.drag-over {
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.1);
+}
+
+/* Style pour indiquer les zones droppables */
+.droppable {
+  position: relative;
+}
+
+.droppable::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 102, 255, 0.05);
+  border-radius: inherit;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.droppable.drag-over::after {
+  opacity: 1;
+}
+
+/* Styles pour le drag & drop */
+.player-card {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+  position: relative;
+  transition: transform 0.2s, opacity 0.2s;
+}
+
+.player-card.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+}
+
+.team-content {
+  position: relative;
+  transition: background-color 0.2s;
+}
+
+.team-content.drag-over {
+  background-color: rgba(0, 102, 255, 0.05);
+}
+
+.team-drop-zone {
+  transition: all 0.2s ease;
+}
+
+.team-drop-zone.drag-over {
+  background-color: rgba(0, 102, 255, 0.1);
+  border-color: #0066ff;
+  transform: scale(1.02);
+}
+
+/* Animation pour le drop */
+@keyframes dropPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.02); }
+  100% { transform: scale(1); }
+}
+
+.team-player {
+  animation: dropPulse 0.3s ease;
+}
+
+/* Ajustement des étoiles dans les cartes de joueurs d'équipe */
+.team-player .star-rating {
+  padding: 0;
+  gap: 0.2rem;
+}
+
+.team-player .star {
+  font-size: 0.8rem;
+  padding: 0;
+}
+
+/* Styles pour les joueurs d'équipe draggables */
+.team-player {
+  cursor: grab;
+  user-select: none;
+  -webkit-user-drag: element;
+}
+
+.team-player:active {
+  cursor: grabbing;
+}
+
+.team-player.dragging {
+  opacity: 0.6;
+  transform: scale(0.95);
+  background: #f8f9fa;
+}
+
+/* Ajustement du style pendant le drag */
+.team-player .remove-button {
+  pointer-events: none; /* Empêche le bouton de supprimer d'interférer avec le drag */
+}
+
+.team-content.drag-over .team-players {
+  background-color: rgba(0, 102, 255, 0.05);
+  border-radius: 4px;
+}
+
+/* Ajustement du bouton de suppression dans les cartes de joueurs d'équipe */
+.team-player .remove-button {
+  padding: 0;
+  height: 18px;
+  width: 18px;
+  min-width: 18px;
+  margin-left: 0.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  opacity: 0;
+  transition: all 0.2s;
+  background: #ff4444;
+  pointer-events: auto; /* Réactive les événements sur le bouton */
+  z-index: 2; /* S'assure que le bouton est au-dessus pour être cliquable */
+}
+
+/* S'assure que le bouton reste visible pendant le drag */
+.team-player.dragging .remove-button {
+  opacity: 1;
+}
+
+.edit-team-modal {
+  width: 400px;
+  max-width: 90vw;
+  padding: 1.5rem;
+}
+
+.edit-team-modal h3 {
+  margin: 0 0 1rem 0;
+  font-size: 1.1rem;
+  color: #1a1a1a;
+  padding-bottom: 0.5rem;
+  border-bottom: 1px solid #e1e4e8;
+}
+
+.edit-team-modal .form-group {
+  margin-bottom: 1.5rem;
+}
+
+.edit-team-modal input {
+  width: 100%;
+  padding: 0.5rem;
+  border: 1px solid #e1e4e8;
+  border-radius: 4px;
+  font-size: 0.95rem;
+}
+
+.edit-team-modal input:focus {
+  outline: none;
+  border-color: #0066ff;
+  box-shadow: 0 0 0 2px rgba(0,102,255,0.1);
 }

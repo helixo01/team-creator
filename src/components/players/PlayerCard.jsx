@@ -45,9 +45,26 @@ function EditPlayerModal({ player, onSave, onCancel }) {
   );
 }
 
-function PlayerCard({ player, onRemove }) {
+export default function PlayerCard({ player }) {
+  const [isDragging, setIsDragging] = useState(false);
   const [isEditing, setIsEditing] = useState(false);
+  const [editName, setEditName] = useState(player.name);
+  const [editRating, setEditRating] = useState(player.rating);
   const { updatePlayer } = usePlayers();
+
+  const handleDragStart = (e) => {
+    setIsDragging(true);
+    e.dataTransfer.setData('application/json', JSON.stringify(player));
+    e.dataTransfer.effectAllowed = 'move';
+    
+    // Ajouter une classe pour le style pendant le drag
+    e.target.classList.add('dragging');
+  };
+
+  const handleDragEnd = (e) => {
+    setIsDragging(false);
+    e.target.classList.remove('dragging');
+  };
 
   const handleSave = (updates) => {
     updatePlayer(player.id, updates);
@@ -56,7 +73,12 @@ function PlayerCard({ player, onRemove }) {
 
   return (
     <>
-      <div className="player-card">
+      <div
+        className={`player-card ${isDragging ? 'dragging' : ''}`}
+        draggable="true"
+        onDragStart={handleDragStart}
+        onDragEnd={handleDragEnd}
+      >
         <div className="player-header">
           <h3>{player.name}</h3>
           <button 
@@ -71,13 +93,9 @@ function PlayerCard({ player, onRemove }) {
           <StarRating 
             rating={player.rating} 
             onRatingChange={() => {}}
+            readonly={true}
           />
         </div>
-        {onRemove && (
-          <button className="remove-button" onClick={() => onRemove(player.id)}>
-            <i className="fas fa-times"></i>
-          </button>
-        )}
       </div>
       {isEditing && (
         <EditPlayerModal 
@@ -88,6 +106,4 @@ function PlayerCard({ player, onRemove }) {
       )}
     </>
   );
-}
-
-export default PlayerCard; 
+} 

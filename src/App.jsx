@@ -6,6 +6,7 @@ import PlayerList from './components/players/PlayerList'
 import TeamList from './components/teams/TeamList'
 import ResetButton from './components/common/ResetButton'
 import SaveButton from './components/common/SaveButton'
+import Settings from './components/settings/Settings'
 import './App.css'
 
 function App() {
@@ -18,6 +19,7 @@ function App() {
             <div className="header-buttons">
               <SaveButton />
               <ResetButton />
+              <Settings />
             </div>
           </div>
           
