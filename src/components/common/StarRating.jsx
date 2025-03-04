@@ -1,32 +1,42 @@
 import React, { useState } from 'react';
 
-function StarRating({ rating, onRatingChange, maxStars = 5 }) {
+export default function StarRating({ rating, onRatingChange, readonly = false }) {
   const [hoverRating, setHoverRating] = useState(0);
 
-  const handleClick = (selectedRating) => {
-    onRatingChange(selectedRating === rating ? 0 : selectedRating);
+  const handleMouseEnter = (index) => {
+    if (!readonly) {
+      setHoverRating(index);
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (!readonly) {
+      setHoverRating(0);
+    }
+  };
+
+  const handleClick = (index) => {
+    if (!readonly && onRatingChange) {
+      onRatingChange(index);
+    }
   };
 
   return (
-    <div 
-      className="star-rating"
-      onMouseLeave={() => setHoverRating(0)}
-    >
-      {[...Array(maxStars)].map((_, index) => {
-        const starValue = index + 1;
-        return (
-          <span
-            key={index}
-            className={`star ${starValue <= (hoverRating || rating) ? 'filled' : ''}`}
-            onClick={() => handleClick(starValue)}
-            onMouseEnter={() => setHoverRating(starValue)}
-          >
-            ★
-          </span>
-        );
-      })}
+    <div className={`star-rating ${readonly ? 'readonly' : ''}`}>
+      {[1, 2, 3, 4, 5].map((index) => (
+        <span
+          key={index}
+          className={`star ${
+            index <= (hoverRating || rating) ? 'filled' : ''
+          }`}
+          onMouseEnter={() => handleMouseEnter(index)}
+          onMouseLeave={handleMouseLeave}
+          onClick={() => handleClick(index)}
+          style={{ cursor: readonly ? 'default' : 'pointer' }}
+        >
+          ★
+        </span>
+      ))}
     </div>
   );
-}
-
-export default StarRating; 
+} 

@@ -3,17 +3,18 @@
   line-height: 1.5;
   font-weight: 400;
 
-  /* Nouvelle palette de couleurs */
+  /* Palette de couleurs principale */
   --primary-color: #3498db;
   --primary-dark: #2980b9;
   --secondary-color: #2ecc71;
   --secondary-dark: #27ae60;
-  --background-light: #f8f9fa;
-  --background-dark: #343a40;
-  --text-light: #f8f9fa;
-  --text-dark: #343a40;
   --danger: #e74c3c;
   --warning: #f1c40f;
+
+  /* Palette claire (mode par défaut) */
+  --background-light: #f8f9fa;
+  --text-light: #f8f9fa;
+  --text-dark: #343a40;
   --gray-100: #f8f9fa;
   --gray-200: #e9ecef;
   --gray-300: #dee2e6;
@@ -23,6 +24,16 @@
   --gray-700: #495057;
   --gray-800: #343a40;
   --gray-900: #212529;
+
+  /* Palette sombre */
+  --dark-background: #1a1b1e;
+  --dark-surface: #2c2e33;
+  --dark-surface-lighter: #3a3d42;
+  --dark-border: #404348;
+  --dark-text-primary: #e9ecef;
+  --dark-text-secondary: #adb5bd;
+  --dark-hover: #34373c;
+  --dark-active: #404348;
 
   color-scheme: light dark;
   color: var(--text-dark);
@@ -36,8 +47,8 @@
 
 /* Mode sombre */
 :root.dark-mode {
-  color: var(--text-light);
-  background-color: var(--background-dark);
+  color: var(--dark-text-primary);
+  background-color: var(--dark-background);
 }
 
 .dark-mode .team-card,
@@ -48,13 +59,13 @@
 .dark-mode .players-list,
 .dark-mode .modal-content,
 .dark-mode .settings-sidebar {
-  background-color: var(--gray-800);
-  border-color: var(--gray-700);
+  background-color: var(--dark-surface);
+  border-color: var(--dark-border);
 }
 
 .dark-mode .team-header,
 .dark-mode .settings-header {
-  border-color: var(--gray-700);
+  border-color: var(--dark-border);
 }
 
 .dark-mode .team-header h3,
@@ -63,32 +74,91 @@
 .dark-mode h2,
 .dark-mode h3,
 .dark-mode .form-group label {
-  color: var(--text-light);
+  color: var(--dark-text-primary);
 }
 
 .dark-mode .form-group input,
 .dark-mode .form-group select {
-  background-color: var(--gray-700);
-  border-color: var(--gray-600);
-  color: var(--text-light);
+  background-color: var(--dark-surface-lighter);
+  border-color: var(--dark-border);
+  color: var(--dark-text-primary);
 }
 
 .dark-mode .team-stats,
 .dark-mode .settings-content {
-  color: var(--gray-400);
+  color: var(--dark-text-secondary);
 }
 
 .dark-mode .team-player {
-  background-color: var(--gray-700);
-  border-color: var(--gray-600);
+  background-color: var(--dark-surface-lighter);
+  border-color: var(--dark-border);
 }
 
 .dark-mode .team-player:hover {
-  background-color: var(--gray-600);
+  background-color: var(--dark-hover);
 }
 
-.dark-mode .drag-over {
-  background-color: rgba(52, 152, 219, 0.2);
+.dark-mode .team-drop-zone {
+  border-color: var(--dark-border);
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .team-drop-zone.drag-over {
+  background-color: rgba(52, 152, 219, 0.15);
+  border-color: var(--primary-color);
+}
+
+.dark-mode .modal-content {
+  background-color: var(--dark-surface);
+}
+
+.dark-mode .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.7);
+}
+
+.dark-mode .settings-sidebar {
+  background-color: var(--dark-surface);
+  border-left: 1px solid var(--dark-border);
+}
+
+.dark-mode .settings-button,
+.dark-mode .edit-icon {
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .settings-button:hover,
+.dark-mode .edit-icon:hover {
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .star {
+  color: var(--dark-border);
+}
+
+.dark-mode .star.filled {
+  color: var(--warning);
+}
+
+/* Ajustements spécifiques pour le mode sombre */
+.dark-mode .scroll-button {
+  background-color: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .scroll-button:hover {
+  background-color: var(--dark-surface-lighter);
+  color: var(--dark-text-primary);
+  border-color: var(--primary-color);
+}
+
+.dark-mode .scroll-button i {
+  color: inherit;
+}
+
+.dark-mode .player-card:hover,
+.dark-mode .team-card:hover {
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
 }
 
 a {
@@ -287,4 +357,177 @@ button:focus-visible {
 
 .dark-mode .team-player-position {
   background-color: var(--primary-dark);
+}
+
+.dark-mode .container {
+  background-color: var(--dark-background);
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .players-list {
+  background-color: var(--dark-background);
+}
+
+.dark-mode .players-list h2 {
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .player-card {
+  background-color: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .player-card:hover {
+  background-color: var(--dark-surface-lighter);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+  border-color: var(--primary-color);
+}
+
+.dark-mode .player-header {
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.dark-mode .player-header h3 {
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .player-rating {
+  background-color: var(--dark-surface);
+}
+
+.dark-mode .player-card[draggable="true"]:active {
+  background-color: var(--dark-active);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 2px var(--primary-dark);
+}
+
+.dark-mode .teams-list {
+  background-color: var(--dark-background);
+}
+
+.dark-mode .teams-list-header h2 {
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .teams-grid {
+  gap: 1rem;
+}
+
+.dark-mode .team-card {
+  background-color: var(--dark-surface);
+  border: 1px solid var(--dark-border);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.dark-mode .team-card:hover {
+  background-color: var(--dark-surface-lighter);
+  border-color: var(--primary-color);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.dark-mode .team-header {
+  background-color: var(--dark-surface-lighter);
+  border-bottom: 1px solid var(--dark-border);
+  padding: 1rem;
+}
+
+.dark-mode .team-content {
+  background-color: var(--dark-surface);
+  padding: 1rem;
+}
+
+.dark-mode .team-stats {
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .team-drop-zone {
+  background-color: var(--dark-surface-lighter);
+  border: 2px dashed var(--dark-border);
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .team-drop-zone.empty {
+  background-color: var(--dark-surface-lighter);
+}
+
+.dark-mode .team-drop-zone.drag-over {
+  background-color: rgba(52, 152, 219, 0.15);
+  border-color: var(--primary-color);
+}
+
+.dark-mode .team-actions button {
+  background-color: transparent;
+  border: none;
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .team-actions .edit-icon:hover {
+  color: var(--primary-color);
+}
+
+.dark-mode .team-actions .delete-button:hover {
+  color: var(--danger);
+}
+
+.dark-mode .settings-header {
+  background-color: var(--dark-surface-lighter);
+  border-bottom: 1px solid var(--dark-border);
+}
+
+.dark-mode .settings-header h2 {
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .settings-header .close-button {
+  background: transparent;
+  color: var(--dark-text-secondary);
+  border: none;
+}
+
+.dark-mode .settings-header .close-button:hover {
+  color: var(--dark-text-primary);
+}
+
+.dark-mode .settings-content {
+  background-color: var(--dark-surface);
+  color: var(--dark-text-secondary);
+}
+
+.dark-mode .settings-section h3 {
+  color: var(--dark-text-primary);
+}
+
+/* Styles pour l'ampoule en mode sombre */
+.dark-mode .bulb {
+  background: var(--dark-surface-lighter);
+  box-shadow: 0 0 1px var(--dark-border);
+}
+
+.dark-mode .bulb-center {
+  background: var(--warning);
+  box-shadow: 0 0 15px var(--warning);
+}
+
+.dark-mode .filament-1,
+.dark-mode .filament-2 {
+  background: var(--warning);
+  box-shadow: 0 0 10px var(--warning);
+}
+
+.dark-mode .reflections span {
+  background: linear-gradient(80deg, var(--dark-surface-lighter) 0%, transparent 100%);
+}
+
+.dark-mode .spark1,
+.dark-mode .spark2,
+.dark-mode .spark3,
+.dark-mode .spark4 {
+  background: var(--warning);
+  box-shadow: 0 0 4px var(--warning);
+}
+
+.dark-mode .switch input:checked + label .bulb {
+  background: var(--warning);
+  box-shadow: 0 0 15px var(--warning);
 }
